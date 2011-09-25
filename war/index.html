@@ -13,10 +13,10 @@
 <script type="text/javascript"> 
 jQuery(document).ready(function() {
   jQuery.ajax({
-    url: '../rest/user/current',
+    url: 'rest/user/current',
     type: 'GET',
     success: function(data) {
-      jQuery('#loggedInUser').text('Welcome, ' + data.email).append('&nbsp;<a href="../rest/user/logout">Logout</a>');
+      jQuery('#loggedInUser').text('Welcome, ' + data.email).append('&nbsp;<a href="rest/user/logout">Logout</a>');
       rebuildList(data);
       jQuery('#sensorGroups .actions a.add').click(showAddSensorGroupDialog);
     },
@@ -28,7 +28,7 @@ jQuery(document).ready(function() {
 function rebuildList(loggedInUser) {
   var ul = jQuery('#sensorGroups ul.list');
   ul.children().remove();
-  jQuery.getJSON('../rest/sensor/group/list', function(data) {
+  jQuery.getJSON('rest/sensor/group/list', function(data) {
     for (var i = 0; i < data.length; i++) {
       var grp = data[i];
       var li = jQuery('<li></li>').text(grp.name).attr('id', 'sensorGroup' + grp.id.id);
@@ -45,7 +45,7 @@ function rebuildList(loggedInUser) {
 }
 
 function deleteSensorGroup(id, onComplete) {
-  jQuery.delete('../rest/sensor/group/' + id, {}, function(data) {
+  jQuery.delete('rest/sensor/group/' + id, {}, function(data) {
     if (onComplete) {onComplete();}
   }, 'json', function(jqXHR, textStatus, errorThrown) {
     alert(textStatus);
@@ -61,7 +61,7 @@ function showAddSensorGroupDialog() {
 </head>
   <body class="top">
     <h1>Sensaaa</h1>
-    <div id="loggedInUser"><a href="../rest/user/login">(click to login)</a></div>
+    <div id="loggedInUser"><a href="rest/user/login">(click to login)</a></div>
     <div id="sensorGroups">
     	<h4>Sensor groups</h4>
     	<ul class="list"></ul>

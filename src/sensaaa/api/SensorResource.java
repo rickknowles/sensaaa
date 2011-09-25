@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import sensaaa.api.exception.NotLoggedInException;
 import sensaaa.api.exception.NotOwnerException;
 import sensaaa.api.exception.NotPermittedToEditSensorGroupException;
+import sensaaa.api.exception.SensorNotFoundException;
 import sensaaa.authorization.AuthorizationService;
 import sensaaa.domain.Sensor;
 import sensaaa.domain.SensorGroup;
@@ -53,14 +54,34 @@ public class SensorResource {
     @Path("list")
     @Produces("application/json")
     public List<Sensor> list() {
-        return sensorRepository.listAll();
+        UserPair loggedIn = authorizationService.getLoggedInUser();
+        if (loggedIn == null) {        
+            return sensorRepository.listAllPublic();
+        } else {
+            return sensorRepository.listAllForUser(loggedIn.getLocal().getId().getId());
+        }
     }
     
     @GET
     @Path("{id}")
     @Produces("application/json")
-    public Sensor getById(@PathParam("id") Long id) {
-    	return sensorRepository.getById(id);
+    public Sensor getById(@PathParam("id") Long id) throws SensorNotFoundException {
+        UserPair loggedIn = authorizationService.getLoggedInUser();
+        if (loggedIn == null) {        
+            Sensor s = sensorRepository.getById(id);
+            if (s == null || !s.isVisibleToPublic()) {
+                throw new SensorNotFoundException(id);
+            } else {
+                return s;
+            }
+        } else {
+            Sensor s = sensorRepository.getByIdForUser(id, loggedIn.getLocal().getId().getId());
+            if (s == null) {
+                throw new SensorNotFoundException(id);
+            } else {
+                return s;
+            }
+        }
     }
     
     @PUT

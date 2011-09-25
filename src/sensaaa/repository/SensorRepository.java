@@ -9,9 +9,15 @@ import sensaaa.domain.Sensor;
 
 public interface SensorRepository {
 
-	public Sensor getById(Long id);
+	public Sensor getById(long id);
+	
+    public Sensor getByIdForUser(long id, long userId);
 	
 	public List<Sensor> listAll();
+    
+    public List<Sensor> listAllForUser(long userId);
+    
+    public List<Sensor> listAllPublic();
 	
 	public List<MeasurementStream> listMeasurementStreamsBySensor(Sensor sensor);
 	

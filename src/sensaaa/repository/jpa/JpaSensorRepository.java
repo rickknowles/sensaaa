@@ -23,9 +23,18 @@ public class JpaSensorRepository implements SensorRepository {
     @PersistenceContext
     private EntityManager em;
 
-    public Sensor getById(Long id) {
+    public Sensor getById(long sensorId) {
         Query q = em.createQuery("SELECT s FROM Sensor s WHERE s.id = ?");
-        q.setParameter(1, id);
+        q.setParameter(1, sensorId);
+        return (Sensor) q.getSingleResult();
+    }
+
+    public Sensor getByIdForUser(long sensorId, long userId) {
+        Query q = em.createQuery("SELECT s FROM Sensor s WHERE s.id = ? AND (s.visibleToPublic == TRUE " +
+                "OR s.id IN (SELECT sp.sensor.id FROM SensorPermission sp WHERE sp.user.id = ?)) " +
+                "ORDER BY s.createdTime, s.id");
+        q.setParameter(1, sensorId);
+        q.setParameter(2, userId);
         return (Sensor) q.getSingleResult();
     }
 
@@ -33,6 +42,20 @@ public class JpaSensorRepository implements SensorRepository {
     public List<Sensor> listAll() {
         return (List<Sensor>) em.createQuery(
                 "SELECT s FROM Sensor s ORDER BY s.createdTime, s.id").getResultList();
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Sensor> listAllForUser(long userId) {
+        Query q = em.createQuery("SELECT s FROM Sensor s WHERE s.visibleToPublic == TRUE " +
+        		"OR s.id IN (SELECT sp.sensor.id FROM SensorPermission sp WHERE sp.user.id = ?) " +
+        		"ORDER BY s.createdTime, s.id");
+        return (List<Sensor>) q.getResultList();
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Sensor> listAllPublic() {
+        return (List<Sensor>) em.createQuery(
+                "SELECT s FROM Sensor s WHERE s.visibleToPublic == TRUE ORDER BY s.createdTime, s.id").getResultList();
     }
 
     @SuppressWarnings("unchecked")

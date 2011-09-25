@@ -10,54 +10,38 @@ import org.joda.time.DateTime;
 import com.google.appengine.api.datastore.Key;
 
 @Entity
-public class AuthorizedUser {
+public class SensorPermission {
 
     private Key id;
-    private String googleUserId;
+    private Sensor sensor;
+    private AuthorizedUser user;
     private DateTime createdTime;
-    private String accessToken;
-    private DateTime approvedTimestamp;
-
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Key getId() {
         return id;
     }
-
     public void setId(Key id) {
         this.id = id;
     }
-
-    public String getGoogleUserId() {
-        return googleUserId;
+    public Sensor getSensor() {
+        return sensor;
     }
-
-    public void setGoogleUserId(String googleUserId) {
-        this.googleUserId = googleUserId;
+    public void setSensor(Sensor sensor) {
+        this.sensor = sensor;
     }
-
-    public DateTime getApprovedTimestamp() {
-        return approvedTimestamp;
+    public AuthorizedUser getUser() {
+        return user;
     }
-
-    public void setApprovedTimestamp(DateTime approvedTimestamp) {
-        this.approvedTimestamp = approvedTimestamp;
+    public void setUser(AuthorizedUser user) {
+        this.user = user;
     }
-
     public DateTime getCreatedTime() {
         return createdTime;
     }
-
     public void setCreatedTime(DateTime createdTime) {
         this.createdTime = createdTime;
-    }
-
-    public String getAccessToken() {
-        return accessToken;
-    }
-
-    public void setAccessToken(String accessToken) {
-        this.accessToken = accessToken;
     }
 
 }
