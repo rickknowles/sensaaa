@@ -7,24 +7,22 @@ import javax.persistence.Id;
 
 import org.joda.time.DateTime;
 
-import com.google.appengine.api.datastore.Key;
-
 @Entity
 public class SensorGroup {
 
-	private Key id;
+	private Long id;
 	private String name;
-	private AuthorizedUser authorizedUser;
+	private Long authorizedUserId;
     private DateTime createdTime;
     private String accessToken;
     private boolean visibleToAll;
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	public Key getId() {
+	public Long getId() {
 		return id;
 	}
-	public void setId(Key id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 	public String getName() {
@@ -39,11 +37,11 @@ public class SensorGroup {
     public void setCreatedTime(DateTime createdTime) {
         this.createdTime = createdTime;
     }
-    public AuthorizedUser getAuthorizedUser() {
-        return authorizedUser;
+    public Long getAuthorizedUserId() {
+        return authorizedUserId;
     }
-    public void setAuthorizedUser(AuthorizedUser authorizedUser) {
-        this.authorizedUser = authorizedUser;
+    public void setAuthorizedUserId(Long authorizedUserId) {
+        this.authorizedUserId = authorizedUserId;
     }
     public String getAccessToken() {
         return accessToken;

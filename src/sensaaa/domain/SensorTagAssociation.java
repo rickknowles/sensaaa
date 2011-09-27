@@ -7,35 +7,33 @@ import javax.persistence.Id;
 
 import org.joda.time.DateTime;
 
-import com.google.appengine.api.datastore.Key;
-
 @Entity
 public class SensorTagAssociation {
 
-	private Key id;
-	private Sensor sensor;
-	private Tag tag;
+	private Long id;
+	private Long sensorId;
+	private Long tagId;
 	private DateTime createdTime;
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	public Key getId() {
+	public Long getId() {
 		return id;
 	}
-	public void setId(Key id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
-    public Sensor getSensor() {
-        return sensor;
+    public Long getSensorId() {
+        return sensorId;
     }
-    public void setSensor(Sensor sensor) {
-        this.sensor = sensor;
+    public void setSensorId(Long sensorId) {
+        this.sensorId = sensorId;
     }
-    public Tag getTag() {
-        return tag;
+    public Long getTagId() {
+        return tagId;
     }
-    public void setTag(Tag tag) {
-        this.tag = tag;
+    public void setTagId(Long tagId) {
+        this.tagId = tagId;
     }
     public DateTime getCreatedTime() {
         return createdTime;

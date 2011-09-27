@@ -7,21 +7,19 @@ import javax.persistence.Id;
 
 import org.joda.time.DateTime;
 
-import com.google.appengine.api.datastore.Key;
-
 @Entity
 public class Tag {
 
-	private Key id;
+	private Long id;
 	private String name;
 	private DateTime createdTime;
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	public Key getId() {
+	public Long getId() {
 		return id;
 	}
-	public void setId(Key id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
     public String getName() {

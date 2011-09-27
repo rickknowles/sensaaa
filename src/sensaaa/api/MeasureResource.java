@@ -90,7 +90,7 @@ public class MeasureResource {
                     continue;
                 }
                 Measurement m = new Measurement();
-                m.setMeasurementStream(stream);
+                m.setMeasurementStreamId(stream.getId());
                 m.setCreatedTime(now);
                 m.setReading(new BigDecimal(obj.toString()));
                 m = measurementRepository.saveOrUpdate(m);

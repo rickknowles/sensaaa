@@ -1,6 +1,5 @@
 package sensaaa.repository.jpa;
 
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,8 +30,7 @@ public class JpaSensorRepository implements SensorRepository {
 
     public Sensor getByIdForUser(long sensorId, long userId) {
         Query q = em.createQuery("SELECT s FROM Sensor s WHERE s.id = ? AND (s.visibleToPublic == TRUE " +
-                "OR s.id IN (SELECT sp.sensor.id FROM SensorPermission sp WHERE sp.user.id = ?)) " +
-                "ORDER BY s.createdTime, s.id");
+                "OR s.id IN (SELECT sp.sensorId FROM SensorPermission sp WHERE sp.userId = ? AND sp.sensorId IS NOT NULL))");
         q.setParameter(1, sensorId);
         q.setParameter(2, userId);
         return (Sensor) q.getSingleResult();
@@ -41,28 +39,28 @@ public class JpaSensorRepository implements SensorRepository {
     @SuppressWarnings("unchecked")
     public List<Sensor> listAll() {
         return (List<Sensor>) em.createQuery(
-                "SELECT s FROM Sensor s ORDER BY s.createdTime, s.id").getResultList();
+                "SELECT s FROM Sensor s ORDER BY s.id").getResultList();
     }
 
     @SuppressWarnings("unchecked")
     public List<Sensor> listAllForUser(long userId) {
         Query q = em.createQuery("SELECT s FROM Sensor s WHERE s.visibleToPublic == TRUE " +
-        		"OR s.id IN (SELECT sp.sensor.id FROM SensorPermission sp WHERE sp.user.id = ?) " +
-        		"ORDER BY s.createdTime, s.id");
+        		"OR s.id IN (SELECT sp.sensorId FROM SensorPermission sp WHERE sp.userId = ? AND sp.sensorId IS NOT NULL) " +
+        		"ORDER BY s.id");
+        q.setParameter(1, userId);
         return (List<Sensor>) q.getResultList();
     }
 
     @SuppressWarnings("unchecked")
     public List<Sensor> listAllPublic() {
         return (List<Sensor>) em.createQuery(
-                "SELECT s FROM Sensor s WHERE s.visibleToPublic == TRUE ORDER BY s.createdTime, s.id").getResultList();
+                "SELECT s FROM Sensor s WHERE s.visibleToPublic == TRUE ORDER BY s.id").getResultList();
     }
 
     @SuppressWarnings("unchecked")
     public List<MeasurementStream> listMeasurementStreamsBySensor(Sensor sensor) {
         Query q = em.createQuery(
-                "SELECT sds FROM SensorDataStream sds.sensor.id = ? " +
-                "WHERE ORDER BY sds.createdTime, sds.id");
+                "SELECT sds FROM SensorDataStream WHERE sds.sensorId = ? ORDER BY sds.id");
         q.setParameter(1, sensor.getId());
         return (List<MeasurementStream>) q.getResultList();
     }

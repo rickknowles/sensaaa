@@ -7,35 +7,40 @@ import javax.persistence.Id;
 
 import org.joda.time.DateTime;
 
-import com.google.appengine.api.datastore.Key;
-
 @Entity
 public class SensorPermission {
 
-    private Key id;
-    private Sensor sensor;
-    private AuthorizedUser user;
+    private Long id;
+    private Long sensorId;
+    private Long sensorGroupId;
+    private Long userId;
     private DateTime createdTime;
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public Key getId() {
+    public Long getId() {
         return id;
     }
-    public void setId(Key id) {
+    public void setId(Long id) {
         this.id = id;
     }
-    public Sensor getSensor() {
-        return sensor;
+    public Long getSensorId() {
+        return sensorId;
     }
-    public void setSensor(Sensor sensor) {
-        this.sensor = sensor;
+    public void setSensorId(Long sensorId) {
+        this.sensorId = sensorId;
     }
-    public AuthorizedUser getUser() {
-        return user;
+    public Long getSensorGroupId() {
+        return sensorGroupId;
     }
-    public void setUser(AuthorizedUser user) {
-        this.user = user;
+    public void setSensorGroupId(Long sensorGroupId) {
+        this.sensorGroupId = sensorGroupId;
+    }
+    public Long getUserId() {
+        return userId;
+    }
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
     public DateTime getCreatedTime() {
         return createdTime;

@@ -6,17 +6,14 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
 
 import org.joda.time.DateTime;
-
-import com.google.appengine.api.datastore.Key;
 
 @Entity
 public class Measurement {
 
-	private Key id;
-	private MeasurementStream measurementStream;
+	private Long id;
+	private Long measurementStreamId;
 	private BigDecimal reading;
 	
 	private Double latitude;
@@ -28,18 +25,17 @@ public class Measurement {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	public Key getId() {
+	public Long getId() {
 		return id;
 	}
-	public void setId(Key id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
-	@ManyToOne(targetEntity = MeasurementStream.class)
-    public MeasurementStream getMeasurementStream() {
-        return measurementStream;
+    public Long getMeasurementStreamId() {
+        return measurementStreamId;
     }
-    public void setMeasurementStream(MeasurementStream measurementStream) {
-        this.measurementStream = measurementStream;
+    public void setMeasurementStreamId(Long measurementStreamId) {
+        this.measurementStreamId = measurementStreamId;
     }
 	public BigDecimal getReading() {
 		return reading;
@@ -77,5 +73,4 @@ public class Measurement {
     public void setIndoor(boolean indoor) {
         this.indoor = indoor;
     }
-	
 }

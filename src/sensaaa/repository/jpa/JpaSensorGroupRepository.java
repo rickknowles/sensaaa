@@ -20,16 +20,34 @@ public class JpaSensorGroupRepository implements SensorGroupRepository {
     @PersistenceContext
     private EntityManager em;
 
-    public SensorGroup getById(Long id) {
+    public SensorGroup getById(long id) {
         Query q = em.createQuery("SELECT sg FROM SensorGroup sg WHERE sg.id = :id");
         q.setParameter("id", id);
         return (SensorGroup) q.getSingleResult();
     }
 
+    public SensorGroup getByIdForUser(long sensorGroupId, long userId) {
+        Query q = em.createQuery("SELECT sg FROM SensorGroup sg WHERE sg.id = ? AND (sg.authorizedUserId = ? " +
+                "OR sg.id IN (SELECT sp.sensorGroupId FROM SensorPermission sp WHERE sp.userId = ? AND sp.sensorId IS NULL))");
+        q.setParameter(1, sensorGroupId);
+        q.setParameter(2, userId);
+        q.setParameter(3, userId);
+        return (SensorGroup) q.getSingleResult();
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<SensorGroup> listAllForUser(long userId) {
+        Query q = em.createQuery("SELECT sg FROM SensorGroup sg WHERE sg.authorizedUserId = ? " +
+                "OR sg.id IN (SELECT sp.sensorGroupId FROM SensorPermission sp WHERE sp.userId = ? AND sp.sensorId IS NULL) " + 
+                "ORDER BY sg.id");
+        q.setParameter(1, userId);
+        return (List<SensorGroup>) q.getResultList();
+    }
+
     @SuppressWarnings("unchecked")
     public List<SensorGroup> listAll() {
         return (List<SensorGroup>) em.createQuery(
-                "SELECT sg FROM SensorGroup sg ORDER BY sg.createdTime, sg.id").getResultList();
+                "SELECT sg FROM SensorGroup sg ORDER BY sg.id").getResultList();
     }
 
     public SensorGroup saveOrUpdate(SensorGroup sg) {

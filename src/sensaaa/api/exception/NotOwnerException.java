@@ -5,11 +5,11 @@ import sensaaa.domain.AuthorizedUser;
 public class NotOwnerException extends Exception {
 
     private final AuthorizedUser loggedIn;
-    private final AuthorizedUser owner;
+    private final Long ownerId;
     
-    public NotOwnerException(AuthorizedUser loggedIn, AuthorizedUser owner) {
+    public NotOwnerException(AuthorizedUser loggedIn, Long ownerId) {
         super();
-        this.owner = owner;
+        this.ownerId = ownerId;
         this.loggedIn = loggedIn;
     }
 
@@ -17,9 +17,10 @@ public class NotOwnerException extends Exception {
         return loggedIn;
     }
 
-    public AuthorizedUser getOwner() {
-        return owner;
+    public Long getOwnerId() {
+        return ownerId;
     }
+
     
     
 }

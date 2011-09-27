@@ -7,12 +7,10 @@ import javax.persistence.Id;
 
 import org.joda.time.DateTime;
 
-import com.google.appengine.api.datastore.Key;
-
 @Entity
 public class AuthorizedUser {
 
-    private Key id;
+    private Long id;
     private String googleUserId;
     private DateTime createdTime;
     private String accessToken;
@@ -20,11 +18,11 @@ public class AuthorizedUser {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public Key getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Key id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

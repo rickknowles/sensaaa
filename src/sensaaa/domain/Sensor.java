@@ -7,13 +7,11 @@ import javax.persistence.Id;
 
 import org.joda.time.DateTime;
 
-import com.google.appengine.api.datastore.Key;
-
 @Entity
 public class Sensor {
 
-	private Key id;
-	private SensorGroup sensorGroup;
+	private Long id;
+	private Long sensorGroupId;
 	private String name;
 	
 	private String calloutUrl;
@@ -31,17 +29,17 @@ public class Sensor {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	public Key getId() {
+	public Long getId() {
 		return id;
 	}
-	public void setId(Key id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
-	public SensorGroup getSensorGroup() {
-		return sensorGroup;
+	public Long getSensorGroupId() {
+		return sensorGroupId;
 	}
-	public void setSensorGroup(SensorGroup sensorGroup) {
-		this.sensorGroup = sensorGroup;
+	public void setSensorGroupId(Long sensorGroupId) {
+		this.sensorGroupId = sensorGroupId;
 	}
 	public String getName() {
 		return name;
