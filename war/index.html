@@ -6,22 +6,13 @@
 <meta http-equiv="content-style-type" content="text/css" /> 
 <meta http-equiv="content-script-type" content="text/javascript" /> 
 <link rel="stylesheet" type="text/css" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/smoothness/jquery-ui.css"/> 
-<link rel="stylesheet" type="text/css" href="../css/sensaaa.css"/> 
+<link rel="stylesheet" type="text/css" href="css/sensaaa.css"/> 
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script> 
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script> 
-<script type="text/javascript" src="../js/sensaaa-common.js"></script> 
+<script type="text/javascript" src="js/sensaaa-common.js"></script> 
 <script type="text/javascript"> 
 jQuery(document).ready(function() {
-  jQuery.ajax({
-    url: 'rest/user/current',
-    type: 'GET',
-    success: function(data) {
-      jQuery('#loggedInUser').text('Welcome, ' + data.email).append('&nbsp;<a href="rest/user/logout">Logout</a>');
-      rebuildList(data);
-      jQuery('#sensorGroups .actions a.add').click(showAddSensorGroupDialog);
-    },
-    error: function() {rebuildList({});}
-  });
+  jQuery('#loggedInUser').loginLink({baseUrl: '.', complete: rebuildList});
   jQuery('#sensorGroups .actions').addFloatReset();
 });
 
@@ -31,7 +22,7 @@ function rebuildList(loggedInUser) {
   jQuery.getJSON('rest/sensor/group/list', function(data) {
     for (var i = 0; i < data.length; i++) {
       var grp = data[i];
-      var li = jQuery('<li></li>').text(grp.name).attr('id', 'sensorGroup' + grp.id.id);
+      var li = jQuery('<li></li>').text(grp.name).attr('id', 'sensorGroup' + grp.id);
       ul.append(li);
     }
 //    ul.find('li').draggable({revert: 'invalid', helper: 'clone', cursor: 'move'});
