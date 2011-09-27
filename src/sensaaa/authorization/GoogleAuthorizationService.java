@@ -22,7 +22,7 @@ public class GoogleAuthorizationService implements AuthorizationService {
     private final Log log = LogFactory.getLog(GoogleAuthorizationService.class);
 
     @Inject
-    private AuthorizedUserRepository sensorOwnerRepository;
+    private AuthorizedUserRepository authorizedUserRepository;
     
     @Inject
     private TokenGenerator tokenGenerator;
@@ -38,7 +38,7 @@ public class GoogleAuthorizationService implements AuthorizationService {
         User user = userService.getCurrentUser();
         log.info("User service reports: id=" + user.getUserId() + " email=" + user.getEmail() + " nickname=" + user.getNickname());
         try {
-            AuthorizedUser owner = sensorOwnerRepository.getByUserId(user.getUserId());
+            AuthorizedUser owner = authorizedUserRepository.getByUserId(user.getUserId());
             log.info("Loading existing user: " + user.getEmail() + " id=" + owner.getId());
             return new UserPair(owner, user);
         } catch (EmptyResultDataAccessException err) {
@@ -47,6 +47,7 @@ public class GoogleAuthorizationService implements AuthorizationService {
             owner.setGoogleUserId(user.getUserId());
             owner.setCreatedTime(new DateTime());
             owner.setAccessToken(tokenGenerator.createToken());
+            authorizedUserRepository.saveOrUpdate(owner);
             return new UserPair(owner, user);
         }
     }
