@@ -4,16 +4,19 @@ import javax.validation.constraints.Size;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.annotate.JsonValue;
 import org.hibernate.validator.constraints.NotEmpty;
 
-public class SensorName {
+public class SensorGroupName {
+    private static final Log log = LogFactory.getLog(SensorGroupName.class);
 
     private String value;
 
-    public SensorName() {}
+    public SensorGroupName() {}
 
-    public SensorName(String value) {
+    public SensorGroupName(String value) {
         this();
         setValue(value);
     }
@@ -31,11 +34,12 @@ public class SensorName {
 
     @Override
     public String toString() {
-        return "SensorName{" + value + "}";
+        return "SensorGroupName{" + value + "}";
     }
 
-    public static SensorName valueOf(String s) {
-        return new SensorName(s);
+    public static SensorGroupName valueOf(String s) {
+        log.info("group=" + s);
+        return new SensorGroupName(s);
     }
 
     @Override
@@ -44,11 +48,11 @@ public class SensorName {
             return true;
         }
 
-        if (o == null || !(o instanceof SensorName)) {
+        if (o == null || !(o instanceof SensorGroupName)) {
             return false;
         }
 
-        SensorName other = (SensorName) o;
+        SensorGroupName other = (SensorGroupName) o;
 
         return new EqualsBuilder().append(value, other.value).isEquals();
     }
