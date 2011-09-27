@@ -1,6 +1,7 @@
 package sensaaa.api;
 
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -16,6 +17,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 
 import org.joda.time.DateTime;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,14 +52,24 @@ public class SensorGroupResource {
     @Path("list")
     @Produces("application/json")
     public List<SensorGroup> list() {
-        return sensorGroupRepository.listAll();
+        UserPair loggedIn = authorizationService.getLoggedInUser();
+        if (loggedIn != null) {        
+            return sensorGroupRepository.listAllForUser(loggedIn.getLocal().getId());
+        } else {
+            return new ArrayList<SensorGroup>();
+        }
     }
     
     @GET
     @Path("{id}")
     @Produces("application/json")
     public SensorGroup getById(@PathParam("id") Long id) {
-        return sensorGroupRepository.getById(id);
+        UserPair loggedIn = authorizationService.getLoggedInUser();
+        if (loggedIn != null) {        
+            return sensorGroupRepository.getByIdForUser(id, loggedIn.getLocal().getId());
+        } else {
+            throw new EmptyResultDataAccessException(1); // replace with better exception
+        }
     }
     
     @POST
