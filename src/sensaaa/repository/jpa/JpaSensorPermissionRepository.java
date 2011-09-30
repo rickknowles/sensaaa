@@ -55,31 +55,50 @@ public class JpaSensorPermissionRepository implements SensorPermissionRepository
 
     @SuppressWarnings("unchecked")
     public List<SensorPermission> listAllSensorPermissionsForUser(long userId, boolean includeGroups, boolean includePublic) {
-        String sql = "SELECT sp FROM SensorPermission sp " +
-                "WHERE sp.userId = :userId ";
-        if (!includeGroups && !includePublic) {
-            sql += "AND sp.sensorGroupId IS NULL AND sp.visibleToPublic = FALSE";
-        } else if (!includeGroups) {
-            sql += "AND sp.sensorGroupId IS NULL";
-        } else if (!includePublic) {
-            sql += "AND sp.visibleToPublic = FALSE";
+        // GAE doesn't support OR queries on multiple columns (WTF?), so we have to merge this manually 
+        List<SensorPermission> perms = new ArrayList<SensorPermission>();
+        String sql = 
+                "SELECT sp FROM SensorPermission sp " +
+                "WHERE sp.userId = :userId";
+        if (!includeGroups) {
+            sql += " AND sp.sensorGroupId IS NULL";
         }
         Query q = em.createQuery(sql);
         q.setParameter("userId", userId);
-        return (List<SensorPermission>) q.getResultList();
+        perms.addAll((List<SensorPermission>) q.getResultList());
+        
+        // merge the public rows in if requested
+        if (includePublic) {
+            sql = "SELECT sp FROM SensorPermission sp " +
+                  "WHERE sp.visibleToPublic = TRUE";
+            if (!includeGroups) {
+                sql += " AND sp.sensorGroupId IS NULL";
+            }
+            perms.addAll((List<SensorPermission>) em.createQuery(sql).getResultList());
+        }
+        return perms;
     }
 
     @SuppressWarnings("unchecked")
     public List<SensorPermission> listAllSensorGroupPermissionsForUser(long userId, boolean includePublic) {
-        String sql = "SELECT sp FROM SensorPermission sp " +
+        // GAE doesn't support OR queries on multiple columns (WTF?), so we have to merge this manually 
+        List<SensorPermission> perms = new ArrayList<SensorPermission>();
+        String sql = 
+                "SELECT sp FROM SensorPermission sp " +
                 "WHERE sp.userId = :userId " +
-                "AND sp.sensorId IS NULL ";
-        if (!includePublic) {
-            sql += "AND sp.visibleToPublic = FALSE";
-        }
+                "AND sp.sensorId IS NULL";
         Query q = em.createQuery(sql);
         q.setParameter("userId", userId);
-        return (List<SensorPermission>) q.getResultList();
+        perms.addAll((List<SensorPermission>) q.getResultList());
+        
+        // merge the public rows in if requested
+        if (includePublic) {
+            sql = "SELECT sp FROM SensorPermission sp " +
+                  "WHERE sp.visibleToPublic = TRUE " +
+                  "AND sp.sensorId IS NULL";
+            perms.addAll((List<SensorPermission>) em.createQuery(sql).getResultList());
+        }
+        return perms;
     }
 
     public boolean hasPermissionOnSensorGroup(long sensorGroupId, long userId) {
