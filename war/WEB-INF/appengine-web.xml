@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <appengine-web-app xmlns="http://appengine.google.com/ns/1.0">
   <application>ricksensor</application>
-  <version>v0-20110930-1522</version>
+  <version>v0-20110930-1554</version>
   <threadsafe>true</threadsafe>
 
   <!--
