@@ -45,6 +45,7 @@ public class JpaTagRepository implements TagRepository {
             return em.merge(sta);
         } else {
             em.persist(sta);
+            em.refresh(sta);
             return sta;
         }        
     }

@@ -32,16 +32,17 @@ public class JpaMeasurementRepository implements MeasurementRepository {
                 "SELECT sr FROM Measurement sr ORDER BY sr.createdTime, sr.id").getResultList();
     }
 
-    public Measurement saveOrUpdate(Measurement sr) {
-        if (em.contains(sr)) {
-            return em.merge(sr);
+    public Measurement saveOrUpdate(Measurement m) {
+        if (em.contains(m)) {
+            return em.merge(m);
         } else {
-            em.persist(sr);
-            return sr;
+            em.persist(m);
+            em.refresh(m);
+            return m;
         }
     }
 
-    public void delete(Measurement sr) {
-        em.remove(sr);
+    public void delete(Measurement m) {
+        em.remove(m);
     }
 }

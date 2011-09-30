@@ -121,6 +121,7 @@ public class JpaSensorRepository implements SensorRepository {
             return em.merge(s);
         } else {
             em.persist(s);
+            em.refresh(s);
             return s;
         }
     }

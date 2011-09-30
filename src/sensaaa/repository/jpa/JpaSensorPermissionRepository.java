@@ -148,6 +148,7 @@ public class JpaSensorPermissionRepository implements SensorPermissionRepository
             return em.merge(sp);
         } else {
             em.persist(sp);
+            em.refresh(sp);
             return sp;
         }
     }
