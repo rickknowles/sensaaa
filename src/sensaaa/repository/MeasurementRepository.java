@@ -11,7 +11,7 @@ public interface MeasurementRepository {
     
     public List<Measurement> listAll();
 
-    public Measurement saveOrUpdate(Measurement sg);
+    public Measurement saveOrUpdate(Measurement m);
     
-    public void delete(Measurement sg);
+    public void delete(Measurement m);
 }

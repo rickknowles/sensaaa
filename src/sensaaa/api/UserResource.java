@@ -23,7 +23,6 @@ import sensaaa.api.exception.UserNotFoundException;
 import sensaaa.authorization.AuthorizationService;
 import sensaaa.domain.AuthorizedUser;
 import sensaaa.repository.AuthorizedUserRepository;
-import sensaaa.view.types.UserPair;
 
 @Path("/user")
 @Component
@@ -39,8 +38,8 @@ public class UserResource {
     @GET
     @Path("current")
     @Produces("application/json")
-    public UserPair getLoggedInUser() throws NotLoggedInException {
-        UserPair me = authorizationService.getLoggedInUser();
+    public AuthorizedUser getLoggedInUser() throws NotLoggedInException {
+        AuthorizedUser me = authorizationService.getLoggedInUser();
         if (me == null) {
             throw new NotLoggedInException();
         }

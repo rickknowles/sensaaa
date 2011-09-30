@@ -7,13 +7,15 @@ import javax.persistence.Id;
 
 import org.joda.time.DateTime;
 
+
 @Entity
 public class AuthorizedUser {
 
-    private Long id;
+    private Long id;    
     private String googleUserId;
     private DateTime createdTime;
     private String accessToken;
+    private String email;
     private DateTime approvedTimestamp;
 
     @Id
@@ -56,6 +58,14 @@ public class AuthorizedUser {
 
     public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
 }

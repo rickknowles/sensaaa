@@ -4,29 +4,32 @@ package sensaaa.api;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.jdo.annotations.Transactional;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
-import javax.ws.rs.PUT;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import sensaaa.api.exception.NotLoggedInException;
 import sensaaa.api.exception.NotOwnerException;
 import sensaaa.api.exception.NotPermittedToEditSensorGroupException;
 import sensaaa.api.exception.SensorNotFoundException;
 import sensaaa.authorization.AuthorizationService;
+import sensaaa.domain.AuthorizedUser;
 import sensaaa.domain.Sensor;
 import sensaaa.domain.SensorGroup;
+import sensaaa.domain.SensorPermission;
 import sensaaa.domain.SensorTagAssociation;
 import sensaaa.domain.Tag;
 import sensaaa.repository.SensorGroupRepository;
+import sensaaa.repository.SensorPermissionRepository;
 import sensaaa.repository.SensorRepository;
 import sensaaa.repository.TagRepository;
 import sensaaa.token.TokenGenerator;
@@ -34,7 +37,6 @@ import sensaaa.validation.types.Elevation;
 import sensaaa.validation.types.Latitude;
 import sensaaa.validation.types.Longitude;
 import sensaaa.validation.types.SensorName;
-import sensaaa.view.types.UserPair;
 
 @Path("/sensor")
 @Component
@@ -46,6 +48,9 @@ public class SensorResource {
     
     @Inject
     private SensorGroupRepository sensorGroupRepository; 
+    
+    @Inject 
+    private SensorPermissionRepository sensorPermissionRepository;
     
     @Inject
     private TagRepository tagRepository; 
@@ -60,11 +65,11 @@ public class SensorResource {
     @Path("list")
     @Produces("application/json")
     public List<Sensor> list() {
-        UserPair loggedIn = authorizationService.getLoggedInUser();
+        AuthorizedUser loggedIn = authorizationService.getLoggedInUser();
         if (loggedIn == null) {        
-            return sensorRepository.listAllPublic();
+            return sensorRepository.listAllVisibleToPublic(true);
         } else {
-            return sensorRepository.listAllForUser(loggedIn.getLocal().getId());
+            return sensorRepository.listAllVisibleToUser(loggedIn.getId());
         }
     }
     
@@ -72,17 +77,17 @@ public class SensorResource {
     @Path("{id}")
     @Produces("application/json")
     public Sensor getById(@PathParam("id") Long id) throws SensorNotFoundException {
-        UserPair loggedIn = authorizationService.getLoggedInUser();
-        if (loggedIn == null) {        
+        AuthorizedUser loggedIn = authorizationService.getLoggedInUser();
+        if (loggedIn == null) {
             Sensor s = sensorRepository.getById(id);
-            if (s == null || !s.isVisibleToPublic()) {
+            if (s == null || !sensorPermissionRepository.isSensorPubliclyVisible(id)) {
                 throw new SensorNotFoundException(id);
             } else {
                 return s;
             }
         } else {
-            Sensor s = sensorRepository.getByIdForUser(id, loggedIn.getLocal().getId());
-            if (s == null) {
+            Sensor s = sensorRepository.getById(id);
+            if (s == null || !sensorPermissionRepository.hasPermissionOnSensor(s.getId(), loggedIn.getId())) {
                 throw new SensorNotFoundException(id);
             } else {
                 return s;
@@ -90,29 +95,29 @@ public class SensorResource {
         }
     }
     
-    @PUT
+    @POST
     @Path("add")
     @Produces("application/json")
     @Transactional
     public Sensor add(
             @FormParam("name") @DefaultValue("") SensorName sensorName, 
-            @FormParam("indoor") boolean indoor, 
-            @FormParam("public") boolean visibleToPublic, 
+            @FormParam("indoor") @DefaultValue("false") boolean indoor, 
             @FormParam("latitude") Latitude latitude,
             @FormParam("longitude") Longitude longitude,
             @FormParam("elevation") Elevation elevation,
-            @FormParam("tags") String tags,
-            @FormParam("parseScript") String parseScript,
-            @FormParam("groupId") Long groupId) throws NotLoggedInException, NotPermittedToEditSensorGroupException {
+            @FormParam("tags") @DefaultValue("") String tags,
+            @FormParam("parseScript") @DefaultValue("") String parseScript,
+            @FormParam("groupId") long groupId,
+            @FormParam("visibleToPublic") @DefaultValue("false") boolean visibleToPublic) throws NotLoggedInException, NotPermittedToEditSensorGroupException {
         // Validate
         
-        UserPair loggedIn = authorizationService.getLoggedInUser();
+        AuthorizedUser loggedIn = authorizationService.getLoggedInUser();
         if (loggedIn == null) {
             throw new NotLoggedInException();
         }
         
         SensorGroup sensorGroup = this.sensorGroupRepository.getById(groupId);
-        if (!sensorGroup.getAuthorizedUserId().equals(loggedIn.getLocal().getId())) {
+        if (!sensorGroup.getAuthorizedUserId().equals(loggedIn.getId())) {
             throw new NotPermittedToEditSensorGroupException(sensorGroup);
         }
         
@@ -124,12 +129,23 @@ public class SensorResource {
         sensor.setCreatedTime(now);
         sensor.setName(sensorName.getValue());
         sensor.setIndoor(indoor);
-        sensor.setVisibleToPublic(visibleToPublic);
         sensor.setParseScript(parseScript);
         sensor.setLatitude(latitude == null ? null : latitude.getValue());
         sensor.setLongitude(longitude == null ? null : longitude.getValue());
         sensor.setElevation(elevation == null ? null : elevation.getValue());
         sensor = this.sensorRepository.saveOrUpdate(sensor);
+        
+        SensorPermission spOwner = new SensorPermission();
+        spOwner.setSensorId(sensor.getId());
+        spOwner.setUserId(loggedIn.getId());
+        sensorPermissionRepository.saveOrUpdate(spOwner);
+        
+        if (visibleToPublic) {
+            SensorPermission spPublic = new SensorPermission();
+            spPublic.setSensorId(sensor.getId());
+            spPublic.setVisibleToPublic(true);
+            sensorPermissionRepository.saveOrUpdate(spPublic);
+        }
         
         // Add tag associations
         if (tags != null && !tags.equals("")) {
@@ -158,15 +174,15 @@ public class SensorResource {
     @Produces("application/json")
     @Transactional
     public Sensor deleteSensor(@PathParam("id") Long id) throws NotLoggedInException, NotOwnerException {
-        UserPair loggedIn = authorizationService.getLoggedInUser();
+        AuthorizedUser loggedIn = authorizationService.getLoggedInUser();
         if (loggedIn == null) {
             throw new NotLoggedInException();
         }
         
         Sensor s = this.sensorRepository.getById(id);
         SensorGroup sg = this.sensorGroupRepository.getById(s.getSensorGroupId());
-        if (!sg.getAuthorizedUserId().equals(loggedIn.getLocal().getId())) {
-            throw new NotOwnerException(loggedIn.getLocal(), sg.getAuthorizedUserId());
+        if (!sg.getAuthorizedUserId().equals(loggedIn.getId())) {
+            throw new NotOwnerException(loggedIn, sg.getAuthorizedUserId());
         }
         
         tagRepository.deleteTagAssocationsBySensor(s.getId());

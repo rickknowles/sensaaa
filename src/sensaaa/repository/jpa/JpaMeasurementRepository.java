@@ -40,7 +40,7 @@ public class JpaMeasurementRepository implements MeasurementRepository {
             return sr;
         }
     }
-    
+
     public void delete(Measurement sr) {
         em.remove(sr);
     }

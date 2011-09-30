@@ -16,6 +16,7 @@ import sensaaa.repository.AuthorizedUserRepository;
 @Repository
 @Component
 public class JpaAuthorizedUserRepository implements AuthorizedUserRepository {
+//    private final Log log = LogFactory.getLog(JpaAuthorizedUserRepository.class);
 
     @PersistenceContext
     private EntityManager em;
@@ -38,16 +39,17 @@ public class JpaAuthorizedUserRepository implements AuthorizedUserRepository {
                 "SELECT so FROM AuthorizedUser so ORDER BY so.createdTime, so.id").getResultList();
     }
 
-    public AuthorizedUser saveOrUpdate(AuthorizedUser so) {
-        if (em.contains(so)) {
-            return em.merge(so);
+    public AuthorizedUser saveOrUpdate(AuthorizedUser user) {
+        if (em.contains(user)) {
+            return em.merge(user);
         } else {
-            em.persist(so);
-            return so;
+            em.persist(user);
+            em.refresh(user);
+            return user;
         }
     }
     
-    public void delete(AuthorizedUser so) {
-        em.remove(so);
+    public void delete(AuthorizedUser user) {
+        em.remove(user);
     }
 }

@@ -1,5 +1,6 @@
 package sensaaa.repository.jpa;
 
+import javax.jdo.annotations.Transactional;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
@@ -24,6 +25,7 @@ public class JpaTagRepository implements TagRepository {
         return (Tag) q.getSingleResult();
     }
     
+    @Transactional
     public Tag saveOrUpdate(Tag t) {
         if (em.contains(t)) {
             return em.merge(t);
@@ -33,6 +35,7 @@ public class JpaTagRepository implements TagRepository {
         }
     }
     
+    @Transactional
     public void delete(Tag t) {
         em.remove(t);
     }

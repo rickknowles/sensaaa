@@ -9,11 +9,11 @@ public interface SensorGroupRepository {
 
     public SensorGroup getById(long id);
     
-    public SensorGroup getByIdForUser(long id, long userId);
-    
     public List<SensorGroup> listAll();
     
-    public List<SensorGroup> listAllForUser(long userId);
+    public List<SensorGroup> listAllVisibleToPublic();
+    
+    public List<SensorGroup> listAllVisibleToUser(long userId);
 
     public SensorGroup saveOrUpdate(SensorGroup sg);
     

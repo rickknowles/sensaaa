@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import sensaaa.domain.AuthorizedUser;
 import sensaaa.repository.AuthorizedUserRepository;
 import sensaaa.token.TokenGenerator;
-import sensaaa.view.types.UserPair;
 
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
@@ -31,24 +30,30 @@ public class GoogleAuthorizationService implements AuthorizationService {
     private UserService userService;
     
     @Override
-    public UserPair getLoggedInUser() {
+    public AuthorizedUser getLoggedInUser() {
         if (!userService.isUserLoggedIn()) {
             return null;
         }
         User user = userService.getCurrentUser();
-        log.info("User service reports: id=" + user.getUserId() + " email=" + user.getEmail() + " nickname=" + user.getNickname());
+        log.info("User service reports: id=" + user.getUserId() + " email=" + user.getEmail());
         try {
             AuthorizedUser owner = authorizedUserRepository.getByUserId(user.getUserId());
+            if (owner.getEmail() == null || !owner.getEmail().equalsIgnoreCase(user.getEmail())) {
+                log.info("Updating user email to " + user.getEmail());
+                owner.setEmail(user.getEmail());
+                authorizedUserRepository.saveOrUpdate(owner);
+            }
             log.info("Loading existing user: " + user.getEmail() + " id=" + owner.getId());
-            return new UserPair(owner, user);
+            return owner;
         } catch (EmptyResultDataAccessException err) {
             log.info("Registering new user: " + user.getEmail());
             AuthorizedUser owner = new AuthorizedUser();
             owner.setGoogleUserId(user.getUserId());
             owner.setCreatedTime(new DateTime());
             owner.setAccessToken(tokenGenerator.createToken());
+            owner.setEmail(user.getEmail());
             authorizedUserRepository.saveOrUpdate(owner);
-            return new UserPair(owner, user);
+            return owner;
         }
     }
     

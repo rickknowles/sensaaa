@@ -15,9 +15,9 @@ public class MeasurementStream {
 	private String key;
 	private String units;
 	private DateTime createdTime;
-	
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	public Long getId() {
 		return id;
 	}

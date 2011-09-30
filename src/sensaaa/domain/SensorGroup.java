@@ -15,10 +15,9 @@ public class SensorGroup {
 	private Long authorizedUserId;
     private DateTime createdTime;
     private String accessToken;
-    private boolean visibleToAll;
-	
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	public Long getId() {
 		return id;
 	}
@@ -48,12 +47,6 @@ public class SensorGroup {
     }
     public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;
-    }
-    public boolean isVisibleToAll() {
-        return visibleToAll;
-    }
-    public void setVisibleToAll(boolean visibleToAll) {
-        this.visibleToAll = visibleToAll;
     }
 	
 }

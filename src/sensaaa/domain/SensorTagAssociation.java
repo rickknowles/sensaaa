@@ -14,9 +14,9 @@ public class SensorTagAssociation {
 	private Long sensorId;
 	private Long tagId;
 	private DateTime createdTime;
-	
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	public Long getId() {
 		return id;
 	}

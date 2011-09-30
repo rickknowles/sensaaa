@@ -20,15 +20,14 @@ public class Sensor {
     private Double longitude;
     private Double elevation;
     private boolean indoor;
-    private boolean visibleToPublic;
     
 	private DateTime createdTime;
 	private String accessToken;
 	
 	private String parseScript;
-	
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	public Long getId() {
 		return id;
 	}
@@ -94,11 +93,5 @@ public class Sensor {
     }
     public void setParseScript(String parseScript) {
         this.parseScript = parseScript;
-    }
-    public boolean isVisibleToPublic() {
-        return visibleToPublic;
-    }
-    public void setVisibleToPublic(boolean visibleToPublic) {
-        this.visibleToPublic = visibleToPublic;
     }
 }

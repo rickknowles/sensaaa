@@ -11,13 +11,13 @@ public interface SensorRepository {
 
 	public Sensor getById(long id);
 	
-    public Sensor getByIdForUser(long id, long userId);
-	
 	public List<Sensor> listAll();
     
-    public List<Sensor> listAllForUser(long userId);
+    public List<Sensor> listAllVisibleToPublic(boolean includePublicGroups);
     
-    public List<Sensor> listAllPublic();
+    public List<Sensor> listAllVisibleToUser(long userId);
+    
+    public List<Sensor> listSensorsByGroupId(long sensorGroupId);
 	
 	public List<MeasurementStream> listMeasurementStreamsBySensor(Sensor sensor);
 	

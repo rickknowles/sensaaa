@@ -14,8 +14,9 @@ public class SensorPermission {
     private Long sensorId;
     private Long sensorGroupId;
     private Long userId;
+    private boolean visibleToPublic;
     private DateTime createdTime;
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long getId() {
@@ -47,6 +48,12 @@ public class SensorPermission {
     }
     public void setCreatedTime(DateTime createdTime) {
         this.createdTime = createdTime;
+    }
+    public boolean isVisibleToPublic() {
+        return visibleToPublic;
+    }
+    public void setVisibleToPublic(boolean visibleToPublic) {
+        this.visibleToPublic = visibleToPublic;
     }
 
 }

@@ -1,9 +1,9 @@
 package sensaaa.authorization;
 
-import sensaaa.view.types.UserPair;
+import sensaaa.domain.AuthorizedUser;
 
 public interface AuthorizationService {
-    public UserPair getLoggedInUser();
+    public AuthorizedUser getLoggedInUser();
     
     public String getLoginRedirectURL(String originalURL);
     

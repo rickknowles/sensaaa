@@ -1,14 +1,15 @@
 package sensaaa.api;
 
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.jdo.annotations.Transactional;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -17,19 +18,20 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 
 import org.joda.time.DateTime;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import sensaaa.api.exception.NotLoggedInException;
 import sensaaa.api.exception.NotOwnerException;
+import sensaaa.api.exception.SensorGroupNotFoundException;
 import sensaaa.api.exception.ValidationFailureException;
 import sensaaa.authorization.AuthorizationService;
+import sensaaa.domain.AuthorizedUser;
 import sensaaa.domain.SensorGroup;
+import sensaaa.domain.SensorPermission;
 import sensaaa.repository.SensorGroupRepository;
+import sensaaa.repository.SensorPermissionRepository;
 import sensaaa.token.TokenGenerator;
 import sensaaa.validation.types.SensorGroupName;
-import sensaaa.view.types.UserPair;
 
 @Path("/sensor/group")
 @Component
@@ -38,6 +40,9 @@ public class SensorGroupResource {
     
     @Inject
     private SensorGroupRepository sensorGroupRepository; 
+    
+    @Inject 
+    private SensorPermissionRepository sensorPermissionRepository;
     
     @Inject
     private AuthorizationService authorizationService;
@@ -52,31 +57,35 @@ public class SensorGroupResource {
     @Path("list")
     @Produces("application/json")
     public List<SensorGroup> list() {
-        UserPair loggedIn = authorizationService.getLoggedInUser();
+        AuthorizedUser loggedIn = authorizationService.getLoggedInUser();
         if (loggedIn != null) {        
-            return sensorGroupRepository.listAllForUser(loggedIn.getLocal().getId());
+            return sensorGroupRepository.listAllVisibleToUser(loggedIn.getId());
         } else {
-            return new ArrayList<SensorGroup>();
+            return sensorGroupRepository.listAllVisibleToPublic();
         }
     }
     
     @GET
     @Path("{id}")
     @Produces("application/json")
-    public SensorGroup getById(@PathParam("id") Long id) {
-        UserPair loggedIn = authorizationService.getLoggedInUser();
+    public SensorGroup getById(@PathParam("id") long id) throws SensorGroupNotFoundException {
+        AuthorizedUser loggedIn = authorizationService.getLoggedInUser();
         if (loggedIn != null) {        
-            return sensorGroupRepository.getByIdForUser(id, loggedIn.getLocal().getId());
-        } else {
-            throw new EmptyResultDataAccessException(1); // replace with better exception
+            SensorGroup sg = sensorGroupRepository.getById(id);
+            if (sensorPermissionRepository.hasPermissionOnSensorGroup(id, loggedIn.getId())) {
+                return sg;
+            }
         }
+        throw new SensorGroupNotFoundException(id); // replace with better exception
     }
     
     @POST
     @Path("register")
     @Produces("application/json")
     @Transactional
-    public SensorGroup registerSensorGroup(@FormParam("name") SensorGroupName name) 
+    public SensorGroup registerSensorGroup(
+            @FormParam("name") SensorGroupName name,
+            @FormParam("visibleToPublic") @DefaultValue("false") boolean visibleToPublic) 
             throws NotLoggedInException, ValidationFailureException {
         if (this.validator != null) {
             Set<ConstraintViolation<SensorGroupName>> errors = this.validator.validate(name);
@@ -85,16 +94,31 @@ public class SensorGroupResource {
             }
         }
         
-        UserPair loggedIn = authorizationService.getLoggedInUser();
+        AuthorizedUser loggedIn = authorizationService.getLoggedInUser();
         if (loggedIn == null) {
             throw new NotLoggedInException();
         }
+        
         SensorGroup sg = new SensorGroup();
         sg.setName(name.getValue());
-        sg.setAuthorizedUserId(loggedIn.getLocal().getId());
+        sg.setAuthorizedUserId(loggedIn.getId());
         sg.setCreatedTime(new DateTime());
         sg.setAccessToken(tokenGenerator.createToken());
-        return sensorGroupRepository.saveOrUpdate(sg);
+        sg = sensorGroupRepository.saveOrUpdate(sg);
+        
+        SensorPermission spOwner = new SensorPermission();
+        spOwner.setSensorGroupId(sg.getId());
+        spOwner.setUserId(loggedIn.getId());
+        sensorPermissionRepository.saveOrUpdate(spOwner);
+        
+        if (visibleToPublic) {
+            SensorPermission spPublic = new SensorPermission();
+            spPublic.setSensorGroupId(sg.getId());
+            spPublic.setVisibleToPublic(true);
+            sensorPermissionRepository.saveOrUpdate(spPublic);
+        }
+        
+        return sg;
     }
     
     @DELETE
@@ -102,14 +126,14 @@ public class SensorGroupResource {
     @Produces("application/json")
     @Transactional
     public SensorGroup deleteSensorGroup(@PathParam("id") Long id) throws NotLoggedInException, NotOwnerException {
-        UserPair loggedIn = authorizationService.getLoggedInUser();
+        AuthorizedUser loggedIn = authorizationService.getLoggedInUser();
         if (loggedIn == null) {
             throw new NotLoggedInException();
         }
         
         SensorGroup sg = this.sensorGroupRepository.getById(id);
-        if (!sg.getAuthorizedUserId().equals(loggedIn.getLocal().getId())) {
-            throw new NotOwnerException(loggedIn.getLocal(), sg.getAuthorizedUserId());
+        if (!sg.getAuthorizedUserId().equals(loggedIn.getId())) {
+            throw new NotOwnerException(loggedIn, sg.getAuthorizedUserId());
         }
         sensorGroupRepository.delete(sg);
         return sg;

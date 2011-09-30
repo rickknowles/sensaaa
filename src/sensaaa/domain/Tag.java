@@ -9,13 +9,12 @@ import org.joda.time.DateTime;
 
 @Entity
 public class Tag {
-
 	private Long id;
 	private String name;
 	private DateTime createdTime;
-	
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	public Long getId() {
 		return id;
 	}

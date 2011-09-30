@@ -22,7 +22,6 @@ import org.joda.time.DateTime;
 import org.python.core.PyObject;
 import org.python.util.PythonInterpreter;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import sensaaa.api.exception.InvalidFormatCSVReadingException;
 import sensaaa.api.exception.InvalidSensorAccessTokenException;
@@ -46,7 +45,6 @@ public class MeasureResource {
     
     @POST
     @Path("{id}")
-    @Transactional
     @Consumes(MediaType.TEXT_PLAIN) 
     public List<Measurement> receiveMeasurement(
             @PathParam("id") Long sensorId,
@@ -62,7 +60,6 @@ public class MeasureResource {
         } else if (sensor.getParseScript() == null) {
             throw new RuntimeException("Error: no parse script defined for sensor " + sensorId);
         }
-            
         
         List<MeasurementStream> streams = sensorRepository.listMeasurementStreamsBySensor(sensor);
         List<Measurement> out = new ArrayList<Measurement>();

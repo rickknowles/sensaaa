@@ -11,7 +11,6 @@ import org.joda.time.DateTime;
 
 @Entity
 public class Measurement {
-
 	private Long id;
 	private Long measurementStreamId;
 	private BigDecimal reading;
@@ -22,9 +21,9 @@ public class Measurement {
     private boolean indoor;
     
     private DateTime createdTime;
-	
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	public Long getId() {
 		return id;
 	}
